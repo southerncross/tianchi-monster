@@ -1,3 +1,5 @@
+-- 创建俩表，因为表明都指定好了，所以其他的shell脚本里的名字都不要改
+
 DROP TABLE train_item;
 CREATE TABLE train_item(
   item_id int8,
