@@ -2,7 +2,7 @@
 
 DROP TABLE train_item;
 CREATE TABLE train_item(
-  item_id int8 PRIMARY KEY,
+  item_id int8,
   item_geohash character(16),
   item_category integer
 );
@@ -14,6 +14,5 @@ CREATE TABLE train_user(
   behavior_type integer,
   user_geohash character(16),
   item_category integer,
-  hours integer,
-  PRIMARY KEY (user_id, item_id)
+  hours integer
 );
