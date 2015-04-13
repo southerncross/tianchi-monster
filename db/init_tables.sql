@@ -14,5 +14,5 @@ CREATE TABLE train_user(
   behavior_type integer,
   user_geohash character(16),
   item_category integer,
-  time timestamp
+  hours integer
 );
