@@ -1,1 +1,6 @@
+<<<<<<< HEAD
 *.csv
+*.DS_Store
+=======
+**/*.csv
+>>>>>>> b5b9abbaeb4c64c64aaede333ba01f8849d6ea98
