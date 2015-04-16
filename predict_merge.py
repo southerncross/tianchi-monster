@@ -145,7 +145,10 @@ if len(sys.argv) == 4:
             positive += 1
         if feat_new[i, 0] != 0:
             true_pos += 1
-    print "count=%d, hit=%d, pos=%d, true_pos=%d, accuracy=%f" % (count, hit, positive, true_pos, float(hit)/true_pos)
+    precision = float(hit)/positive
+    recall = float(hit)/true_pos
+    f1 = 2 * precision * recall / (precision + recall)
+    print "count=%d, hit=%d, pos=%d, true_pos=%d, precision=%f, recall=%f, f1=%f" % (count, hit, positive, true_pos, precision, recall, f1)
 
 fw = open("pred_res.csv", "wb")
 csvw = csv.writer(fw)
