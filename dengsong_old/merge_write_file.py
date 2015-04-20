@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import csv
 import sys
+import numpy as np
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 2:
     print "Usage: merge.py (date) [date]"
     exit(0)
 
@@ -38,24 +39,23 @@ else:
 
 for date in range(date1, date2+1):
     print "dealing date %d" % date
-    feats = ("feature%d_1.csv"%date, "feature%d_2.csv"%date, "feature%d_5.csv"%date, "feature%d_7.csv"%date, "feature%d_14.csv"%date, "feature%d_21.csv"%date)
-    feats = map(lambda s: "E:/tianchi_feature/"+s, feats)
+    feat_files = ("feature_limit_%d_1.csv"%date, "feature_limit_%d_2.csv"%date, "feature_limit_%d_5.csv"%date, "feature_limit_%d_7.csv"%date, "feature_limit_%d_14.csv"%date, "feature_limit_%d_21.csv"%date)
     # feature 数目
     FEAT_SIZE = 24 + 1
     default_feat = [0] * FEAT_SIZE
 
-    wf = open("E:/tianchi_feature/%d_feat.csv"%date, 'wb')
+    wf = open("%d_feat.csv"%date, 'wb')
     wp = csv.writer(wf)
-    wf1 = open("E:/tianchi_feature/%d_feat_user_item.csv"%date, 'wb')
+    wf1 = open("%d_feat_user_item.csv"%date, 'wb')
     wp1 = csv.writer(wf1)
 
 
     ui_feature = {}
     # 特征提取
-    for i in range(0, len(feats)):
-        print "\r"+feats[i],
+    for i in range(0, len(feat_files)):
+        print "\r"+feat_files[i],
         sys.stdout.flush()
-        fp = open(feats[i], 'r')
+        fp = open(feat_files[i], 'r')
         for line in fp:
             (ui, ii, f1, f2, f3, f4) = line.strip().split(',')
             if (ui, ii) not in ui_feature:
@@ -67,7 +67,7 @@ for date in range(date1, date2+1):
         fp.close()
     # tag提取
     print "\ndealing tag"
-    fp = open("E:/tianchi_feature/tag%d.csv"%date, 'r')
+    fp = open("tag_limit%d.csv"%date, 'r')
     for line in fp:
         (ui, ii, tag) = line.strip().split(',')
         if (ui, ii) not in ui_feature:
@@ -79,6 +79,7 @@ for date in range(date1, date2+1):
     print "writing back with item_num: ", len(ui_feature)
     pos_count = 0
     neg_count = 0
+    
     for k in ui_feature:
         # 处理数据倾斜
         print "\r", pos_count+neg_count,
@@ -99,4 +100,4 @@ for date in range(date1, date2+1):
     wf.close()
     wf1.close()
 
-    print pos_count, neg_count, pos_count + neg_count
+    print "\r", pos_count, neg_count, pos_count + neg_count

@@ -1,18 +1,12 @@
 #!/bin/ruby
 
+load 'config.rb'
+
 name = ARGV[0]
-
-def clean
-  puts "\e[H\e[2J";
-end
-
-def emoji()
-  print [127740 + rand(1000)].pack('U*');
-end
 
 file = File.open(name, "w")
 
-print emoji(), " converting...\n"
+print " converting...\n"
 
 while line = $stdin.gets do
   row = line.chomp.split(',')
@@ -23,4 +17,4 @@ end
 
 file.close
 
-print emoji(), " convert completed!\n"
+print "convert completed!\n"

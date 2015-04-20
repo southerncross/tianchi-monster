@@ -19,4 +19,4 @@ csv_item_new=$ROOT_PATH/train_item.csv
 tail +2 $csv_user > $csv_user_new
 tail +2 $csv_item > $csv_item_new
 
-ruby trans_csv.rb
+#ruby trans_csv.rb

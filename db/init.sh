@@ -8,9 +8,9 @@
 ROOT_PATH=/Users/dengshihong/workspace/tianchi-monster/db
 
 table_item=train_item
-csv_item=$ROOT_PATH/$table_item.csv
+csv_item=$ROOT_PATH/${table_item}.csv
 table_user=train_user
-csv_user=$ROOT_PATH/train_user_new.csv
+csv_user=$ROOT_PATH/${table_user}_new.csv
 
 # psql -d tianchi -f init_tables.sql
 psql -d tianchi -c "COPY $table_item from '$csv_item' with delimiter ',';"
