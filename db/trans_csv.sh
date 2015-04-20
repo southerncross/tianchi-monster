@@ -10,13 +10,11 @@
 # 其他变量不要改动
 # 不要多次执行这个脚本，因为每次都会删掉首行！
 
-ROOT_PATH=/Users/dengshihong/workspace/tianchi-monster/db
+ROOT_PATH=/Users/lishunyang/workspace/tianchi-monster/db
 csv_user=$ROOT_PATH/tianchi_mobile_recommend_train_user.csv
 csv_user_new=$ROOT_PATH/train_user.csv
 csv_item=$ROOT_PATH/tianchi_mobile_recommend_train_item.csv
 csv_item_new=$ROOT_PATH/train_item.csv
 
-tail +2 $csv_user > $csv_user_new
+tail +2 $csv_user | ruby convert.rb $csv_user_new
 tail +2 $csv_item > $csv_item_new
-
-#ruby trans_csv.rb
