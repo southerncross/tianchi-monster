@@ -3,10 +3,13 @@ import csv
 import sys
 import numpy as np
 from sklearn import linear_model
+import copy
 
 if len(sys.argv) < 3:
-    print "Usage: merge.py (train date) (predict date) [verify]"
+    print "Usage: merge.py (train_date) [...train_date] (predict date)"
     exit(0)
+
+train_date_num = len(sys.argv) - 2
 
 
 # 读取全局热度记录
@@ -15,19 +18,19 @@ item_hotness = {}
 user_behavior = {}
 cate_hotness = {}
 item_cate_map = {}
-fp_item_hotness = open("E:/tianchi_feature/feature_item_hotness.csv", 'r')
+fp_item_hotness = open("E:/tianchi_feature_filtered/feature_item_hotness.csv", 'r')
 for line in fp_item_hotness:
     (ii, all, h1, h2, h3, h4) = map(lambda x:int(x), line.strip().split(','))
     item_hotness[ii] = [all, h1, h2, h3, h4]
-fp_user_behavior = open("E:/tianchi_feature/feature_user_behavior.csv", 'r')
+fp_user_behavior = open("E:/tianchi_feature_filtered/feature_user_behavior.csv", 'r')
 for line in fp_user_behavior:
     (ui, all, h1, h2, h3, h4) = map(lambda x:int(x), line.strip().split(','))
     user_behavior[ui] = [all, h1, h2, h3, h4]
-fp_cate_hotness = open("E:/tianchi_feature/feature_item_category_hotness.csv", 'r')
+fp_cate_hotness = open("E:/tianchi_feature_filtered/feature_item_category_hotness.csv", 'r')
 for line in fp_cate_hotness:
     (ci, all, h1, h2, h3, h4) = map(lambda x:int(x), line.strip().split(','))
     cate_hotness[ci] = [all, h1, h2, h3, h4]
-fp_item_cate_map = open("E:/tianchi_feature/tianchi_mobile_recommend_train_item.csv", 'r')
+fp_item_cate_map = open("E:/tianchi_feature_filtered/tianchi_mobile_recommend_train_item.csv", 'r')
 fp_item_cate_map.readline()
 for line in fp_item_cate_map:
     (ii, geo, ci) = line.strip().split(',')
@@ -37,7 +40,8 @@ print "pre load finished"
 
 def load_raw_feature(date):
     print "dealing date %d" % date
-    feat_files = ("feature_limit_%d_1.csv"%date, "feature_limit_%d_2.csv"%date, "feature_limit_%d_5.csv"%date, "feature_limit_%d_7.csv"%date, "feature_limit_%d_14.csv"%date, "feature_limit_%d_21.csv"%date)
+    feat_opes_range = [1] # (1, 2, 5, 7, 14)
+    feat_files = map(lambda r: "feature_limit_%d_%d.csv"%(date, r), feat_opes_range)
     feat_files = map(lambda s: "E:/tianchi_feature_filtered/"+s, feat_files)
     # feature 数目
     FEAT_SIZE = 4*len(feat_files) + 1
@@ -68,9 +72,14 @@ def load_raw_feature(date):
         # 如果买了就是1，不管买了多少
         ui_feature[(ui, ii)][0] = 1 if tag != 0 else 0
     fp.close()
-    return ui_feature
+    return copy.deepcopy(ui_feature)
             
-def balance_pos_neg(ui_feature):
+def balance_pos_neg(ui_feature, proportion = 1.0):
+    """balance positive and negetive data
+    Args:
+        ui_feature: init data
+        proportion: neg / pos
+    """
     print "balancing positive and negetive data"
     pos_count = 0
     neg_count = 0
@@ -82,7 +91,7 @@ def balance_pos_neg(ui_feature):
         if v[0] == 1:
             pos_count += 1
         elif v[0] == 0:
-            if neg_count >= pos_count:
+            if neg_count >= pos_count * proportion:
                 continue
             neg_count += 1
         ret_feature[k] = v
@@ -97,22 +106,27 @@ def add_global_feature(ui_feature):
         v += item_hotness[k[1]]
         v += cate_hotness[item_cate_map[k[1]]] if k[1] in item_cate_map else [0,0,0,0,0]
 
-date1 = int(sys.argv[1])
-date2 = int(sys.argv[2])
 
-# "deal with day %d" % date1
-ui_raw_feat_train = load_raw_feature(date1)
-ui_feat_train = balance_pos_neg(ui_raw_feat_train)
-add_global_feature(ui_feat_train)
-
+# 加载多天的数据
+print "load train features of dates: ", sys.argv[1:train_date_num+1]
 ui_train = []
 feat_train = []
-for k in ui_feat_train:
-    ui_train.append(list(k))
-    feat_train.append(ui_feat_train[k])
+for di in range(1, train_date_num+1):
+    date1 = int(sys.argv[di])
+    # "deal with day %d" % date1
+    ui_raw_feat_train = load_raw_feature(date1)
+    ui_feat_train = balance_pos_neg(ui_raw_feat_train, 10)
+    add_global_feature(ui_feat_train)
+
+    for k in ui_feat_train:
+        ui_train.append(list(k))
+        feat_train.append(ui_feat_train[k])
+
+print "load finished with entries: ", len(ui_train), len(feat_train)
 feat_data = np.array(feat_train)
 
 # "deal with day %d" % date2
+date2 = int(sys.argv[-1])
 ui_feat_pre = load_raw_feature(date2)
 add_global_feature(ui_feat_pre)
 
@@ -123,16 +137,16 @@ for k in ui_feat_pre:
     feat_pre.append(ui_feat_pre[k])
 feat_new = np.array(feat_pre)
 
-print ui_train[0], feat_data[0,:]
-print ui_pre[0], feat_new[0,:]
+# print ui_train[0], feat_data[0,:]
+# print ui_pre[0], feat_new[0,:]
 
-logistic = linear_model.LogisticRegression()
+logistic = linear_model.LogisticRegression(penalty='l1')
 logistic.fit(feat_data[:, 1:], feat_data[:, 0])
 print 'Fit finished'
 res = logistic.predict(feat_new[:, 1:])
 print 'Predict finished'
 
-if len(sys.argv) == 4:
+if sys.argv[-1] != 32:
     count = 0
     hit = 0
     positive = 0
@@ -157,4 +171,3 @@ for k in ui_pre:
     if res[count] != 0:
         csvw.writerow(k)
     count += 1
-print count, len(res)
