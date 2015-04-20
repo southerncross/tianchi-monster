@@ -1,7 +1,5 @@
 #!/bin/ruby
 
-load 'config.rb'
-
 name = ARGV[0]
 
 file = File.open(name, "w")
