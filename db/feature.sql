@@ -1,3 +1,1 @@
-select * from (select * from (select * from (select user_id, item_id, count(*) as type1 from train_user where behavior_type=1 and group by user_id, item_id) A full outer join (select user_id, item_id, count(*) as type2 from train_user where behavior_type=2 group by user_id, item_id) B  using(user_id, item_id)) AB full outer join (select user_id, item_id, count(*) as type3 from train_user where behavior_type=3 group by user_id, item_id) C using (user_id, item_id)) ABC full outer join (select user_id, item_id, count(*) as type4 from train_user where behavior_type=4 group by user_id, item_id) D using (user_id, item_id);
-
-COALESCE
+select
