@@ -20,9 +20,27 @@ print 'Fit finished'
 res = logistic.predict(feat_new[:, 1:])
 print 'Predict finished'
 
+
 count = 0
-for line in fr:
-    if res[count] != 0:
-        fw.write(line)
+hit = 0
+positive = 0
+true_pos = 0
+for i in range(len(res)):
     count += 1
-print count, len(res)
+    if res[i] != 0 and feat_new[i, 0] != 0:
+        hit += 1
+    if res[i] != 0:
+        positive += 1
+    if feat_new[i, 0] != 0:
+        true_pos += 1
+precision = float(hit)/positive
+recall = float(hit)/true_pos
+f1 = 2 * precision * recall / (precision + recall)
+print "count=%d, hit=%d, pos=%d, true_pos=%d, precision=%f, recall=%f, f1=%f" % (count, hit, positive, true_pos, precision, recall, f1)
+
+# count = 0
+# for line in fr:
+#     if res[count] != 0:
+#         fw.write(line)
+#     count += 1
+# print count, len(res)
